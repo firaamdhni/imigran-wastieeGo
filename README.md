@@ -137,10 +137,18 @@ Pemisahan tegas antara logika penanganan data dengan rendering antarmuka:
 Tim mematuhi aturan baku version control sebagai berikut:
 
 ### 1. Aturan Penamaan Branch
-- **Fitur Baru**: `feat_{nama_fitur}/{tanggal}`  
-  *Contoh*: `feat_kontainerisasi_docker/12-10-2026`, `feat_riwayat_oop/12-10-2026`
-- **Perbaikan Bug**: `fix_{nama_fitur}/{tanggal}`  
-  *Contoh*: `fix_navigasi_kamera/12-10-2026`
+Format: `feat_{nama_fitur}/{tanggal}` dan `fix_{nama_fitur}/{tanggal}`. Setiap fitur aplikasi dikembangkan pada branch tersendiri:
+
+| No | Nama Branch | Fitur yang Dikerjakan | Tanggal |
+|:---:|:---|:---|:---:|
+| 1 | `feat_authentikasi/12-10-2026` | Login, Register, PasswordField, Sesi Pengguna | 12-10-2026 |
+| 2 | `feat_dashboard_beranda/12-10-2026` | Sidebar, Layout Dashboard, Beranda & Cincin Emisi Karbon | 12-10-2026 |
+| 3 | `feat_scan_acara/12-10-2026` | Pemindaian QR Code & Pop-up Bergabung Acara | 12-10-2026 |
+| 4 | `feat_misi_acara/12-10-2026` | Model OOP Mission, Daftar Misi & Timer Hitung Mundur | 12-10-2026 |
+| 5 | `feat_kamera_klasifikasi/12-10-2026` | Kamera Cerdas, Model OOP WasteItem & WasteClassifierService | 12-10-2026 |
+| 6 | `feat_riwayat_setoran/12-10-2026` | Riwayat Setoran (Container-Presenter Pattern) & Styling | 12-10-2026 |
+| 7 | `feat_penyelenggara_profil/12-10-2026` | Profil Pengguna & Pendaftaran Penyelenggara Acara | 12-10-2026 |
+| 8 | `feat_kontainerisasi_docker/12-10-2026` | Dockerfile Multi-Stage, Docker Compose, & Dokumentasi UTS | 12-10-2026 |
 
 ### 2. Format Pesan Commit (Conventional Commits)
 - `feat: <deskripsi>` → Untuk penambahan/peningkatan fitur baru.

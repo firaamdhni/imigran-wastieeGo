@@ -84,9 +84,15 @@ Dokumen ini disusun untuk memudahkan tim dalam membuat file slide (PowerPoint / 
 ---
 
 ### Slide 7: Manajemen Versi (Git & GitHub Workflow)
-* **Aturan Branching**:
-  - Fitur Baru: `feat_{nama_fitur}/{tanggal}` (e.g., `feat_riwayat_oop/12-10-2026`)
-  - Bug Fix: `fix_{nama_fitur}/{tanggal}`
+* **Aturan & Penerapan Branching per Fitur**:
+  - `feat_authentikasi/12-10-2026` (Login, Register, Session)
+  - `feat_dashboard_beranda/12-10-2026` (Sidebar, Beranda, Cincin Emisi)
+  - `feat_scan_acara/12-10-2026` (Scan QR & Popup Acara)
+  - `feat_misi_acara/12-10-2026` (Model OOP Mission & Misi Page)
+  - `feat_kamera_klasifikasi/12-10-2026` (Model WasteItem & WasteClassifierService)
+  - `feat_riwayat_setoran/12-10-2026` (Riwayat Container-Presenter & Styling)
+  - `feat_penyelenggara_profil/12-10-2026` (Profil & Pendaftaran Penyelenggara)
+  - `feat_kontainerisasi_docker/12-10-2026` (Dockerfile, Docker Compose, Docs)
 * **Standar Pesan Commit**:
   - `feat:` penambahan fitur baru
   - `fix:` perbaikan error/bug
