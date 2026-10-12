@@ -72,7 +72,7 @@ Dokumen ini disusun untuk memudahkan tim dalam membuat file slide (PowerPoint / 
 
 ### Slide 6: Kontainerisasi dengan Docker
 * **Link Docker Hub Publik**:  
-  👉 `https://hub.docker.com/r/mahasiswa/wastieego-app` (Tag: `mahasiswa/wastieego-app:v1-UTS`)
+  👉 `https://hub.docker.com/r/firaamdhni/imigran-wastieego` (Tag: `firaamdhni/imigran-wastieego:v1-UTS`)
 * **Poin Penting Dockerfile**:
   - **Multi-Stage Build (4 Stages)**: `base` → `deps` → `builder` → `runner`.
   - **Output Standalone**: Memanfaatkan fitur `output: "standalone"` Next.js sehingga ukuran image berkurang drastis dari ~1GB menjadi ~150MB.
