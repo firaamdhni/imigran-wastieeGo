@@ -2,8 +2,8 @@
 
 [![Next.js](https://img.shields.io/badge/Framework-Next.js%2015-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/Library-React%2019-blue?logo=react)](https://react.js.org/)
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Public%20Image-2496ED?logo=docker)](https://hub.docker.com/r/firaamdhni/imigran-wastieego)
-[![Docker Tag](https://img.shields.io/badge/Tag-v1--UTS-success)](https://hub.docker.com/r/firaamdhni/imigran-wastieego/tags)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Public%20Image-2496ED?logo=docker)](https://hub.docker.com/r/hwracil/imigran-wastieego)
+[![Docker Tag](https://img.shields.io/badge/Tag-v1--UTS-success)](https://hub.docker.com/r/hwracil/imigran-wastieego/tags)
 
 > **UTS PRAKTIKUM PEMROGRAMAN BERORIENTASI OBJEK LANJUT (POPL) KELAS A**  
 > Proyek Pengembangan Aplikasi Web Front-End Berbasis OOP & Kontainerisasi Docker
@@ -163,8 +163,8 @@ Format: `feat_{nama_fitur}/{tanggal}` dan `fix_{nama_fitur}/{tanggal}`. Setiap f
 Aplikasi telah dikontainerisasi menggunakan **Multi-Stage Build Dockerfile** untuk memastikan image berukuran kecil, efisien, dan aman.
 
 ### 1. Tautan Publik Docker Hub
-🔗 **Docker Hub Repository**: [https://hub.docker.com/r/firaamdhni/imigran-wastieego](https://hub.docker.com/r/firaamdhni/imigran-wastieego)  
-🏷️ **Image Tag Pengumpulan**: `firaamdhni/imigran-wastieego:v1-UTS` (Wajib berakhiran `-UTS`)
+🔗 **Docker Hub Repository**: [https://hub.docker.com/r/hwracil/imigran-wastieego](https://hub.docker.com/r/hwracil/imigran-wastieego)  
+🏷️ **Image Tag Pengumpulan**: `hwracil/imigran-wastieego:v1-UTS` (Wajib berakhiran `-UTS`)
 
 ### 2. Poin-Poin Penting Dockerfile
 - **Multi-Stage Build (4 Tahap)**:
