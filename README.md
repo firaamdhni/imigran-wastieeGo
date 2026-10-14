@@ -12,11 +12,11 @@
 
 ## 👥 Informasi Tim & Kontribusi
 
-| No | Nama Anggota | NIM | Peran Utama | Contoh Commit Kontribusi |
+| No | Nama Anggota | NPM | Peran Utama | Contoh Commit Kontribusi |
 |:---:|:---|:---:|:---|:---|
-| 1 | [Nama Anggota 1] | [NIM 1] | Project Lead & OOP Domain Architecture | `feat: implementasi model OOP WasteItem, Mission, dan service klasifikasi` |
-| 2 | [Nama Anggota 2] | [NIM 2] | UI/UX & Container-Presenter Implementation | `feat: integrasi halaman riwayat setoran dengan container-presenter pattern` |
-| 3 | [Nama Anggota 3] | [NIM 3] | Docker Containerization & State Management | `chore: konfigurasi Dockerfile multi-stage dan docker-compose v1-UTS` |
+| 1 | **Annisa Haura Dhiya** | 2408107010030 | Project Lead, Docker DevOps & State Management | `chore: konfigurasi Dockerfile multi-stage, docker-compose v1-UTS dan push Docker Hub` |
+| 2 | **Naila Hafizha** | 2408107010026 | Front-End UI/UX & Container-Presenter Pattern | `feat: integrasi halaman riwayat setoran dengan container-presenter pattern` |
+| 3 | **Fira Ramadhani** | 2408107010019 | OOP Domain Architecture & Git Workflow Lead | `feat: implementasi model OOP WasteItem, Mission, dan service klasifikasi` |
 
 ---
 
@@ -177,19 +177,28 @@ Aplikasi telah dikontainerisasi menggunakan **Multi-Stage Build Dockerfile** unt
 
 ### 3. Panduan Menjalankan Docker Secara Lokal
 
-#### A. Menggunakan Docker CLI
+#### A. Menggunakan Docker CLI (Unduh & Jalankan Image Publik)
 ```bash
-# 1. Build Docker image dengan tag berakhiran -UTS
-docker build -t mahasiswa/wastieego-app:v1-UTS .
+# 1. Unduh image dari Docker Hub publik
+docker pull hwracil/imigran-wastieego:v1-UTS
 
 # 2. Jalankan kontainer
-docker run -d -p 3000:3000 --name wastieego-web mahasiswa/wastieego-app:v1-UTS
+docker run -d -p 3000:3000 --name wastieego-app hwracil/imigran-wastieego:v1-UTS
 
 # 3. Buka browser pada alamat:
 # http://localhost:3000
 ```
 
-#### B. Menggunakan Docker Compose
+#### B. Build & Run Secara Lokal dari Source Code
+```bash
+# 1. Build Docker image lokal dengan tag berakhiran -UTS
+docker build -t hwracil/imigran-wastieego:v1-UTS .
+
+# 2. Jalankan kontainer lokal
+docker run -d -p 3000:3000 --name wastieego-app hwracil/imigran-wastieego:v1-UTS
+```
+
+#### C. Menggunakan Docker Compose
 ```bash
 # Jalankan service secara otomatis
 docker-compose up -d
@@ -198,16 +207,16 @@ docker-compose up -d
 docker-compose down
 ```
 
-### 4. Langkah Push ke Docker Hub
+### 4. Langkah Push ke Docker Hub (Telah Terpenuhi)
 ```bash
-# Login ke Docker Hub
+# Login ke akun Docker Hub
 docker login
 
-# Tag image sesuai nama repository publik Docker Hub Anda
-docker tag mahasiswa/wastieego-app:v1-UTS <username_dockerhub>/wastieego-app:v1-UTS
+# Tag image sesuai nama repository publik
+docker tag wastieego-app:v1-UTS hwracil/imigran-wastieego:v1-UTS
 
 # Push image ke Docker Hub publik
-docker push <username_dockerhub>/wastieego-app:v1-UTS
+docker push hwracil/imigran-wastieego:v1-UTS
 ```
 
 ---
