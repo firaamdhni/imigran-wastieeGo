@@ -43,6 +43,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Folder data penyimpanan peserta & pemenang (di-mount sebagai volume agar tidak hilang saat kontainer dibuat ulang)
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+ENV DATA_DIR=/app/data
+
 USER nextjs
 
 EXPOSE 3000

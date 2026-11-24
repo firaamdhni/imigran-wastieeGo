@@ -30,7 +30,9 @@ export default function LoginPage() {
 
   const masukKeAplikasi = (nama) => {
     Sesi.simpan(nama);
-    router.push("/dashboard");
+    let tujuan = "/dashboard";
+    try { if (sessionStorage.getItem("wastieego_kode_tertunda")) tujuan = "/dashboard/scan"; } catch (e) {}
+    router.push(tujuan);
   };
 
   const kirim = (e) => {
@@ -69,6 +71,7 @@ export default function LoginPage() {
             <button className="btn-lebar" disabled={!bisaKirim}>Masuk</button>
           </form>
           <p className="pindah">Belum punya akun? <Link href="/register">Daftar</Link></p>
+          <p className="pindah"><Link href="/penyelenggara/login">Masuk sebagai penyelenggara</Link></p>
         </section>
       </div>
     </div>

@@ -13,7 +13,14 @@ function Penjaga({ children }) {
   const masuk = siap && Sesi.ambil();
 
   useEffect(() => {
-    if (siap && !Sesi.ambil()) router.replace("/login");
+    if (siap && !Sesi.ambil()) {
+      /* dibuka dari tautan QR tapi belum login: titip kodenya, dipakai di halaman Scan setelah login */
+      try {
+        const kode = new URLSearchParams(window.location.search).get("kode");
+        if (kode) sessionStorage.setItem("wastieego_kode_tertunda", kode);
+      } catch (e) {}
+      router.replace("/login");
+    }
   }, [siap, router]);
 
   if (!masuk) return null;

@@ -14,3 +14,11 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
+      # kunci penanda sesi penyelenggara: isi lewat file .env, lihat .env.example
+      - SESSION_SECRET=${SESSION_SECRET:?Isi SESSION_SECRET di file .env}
+      - DATA_DIR=/app/data
+    volumes:
+      - wastieego-data:/app/data
+
+volumes:
+  wastieego-data:

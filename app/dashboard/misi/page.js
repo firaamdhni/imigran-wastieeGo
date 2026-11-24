@@ -1,17 +1,41 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { panggilApi } from "@/lib/api";
+import ModalKlaimMisi from "@/components/ModalKlaimMisi";
 
 /* halaman daftar misi + timer */
 export default function MisiPage() {
   const router = useRouter();
-  const { misi, sudahGabung, sisaDetik, bukaPopup } = useStore();
+  const { misi, sudahGabung, sisaDetik, bukaPopup, kodeAcara, nama } = useStore();
+  const [misiKlaim, setMisiKlaim] = useState(null);
+  const [statusKlaimMap, setStatusKlaimMap] = useState({});
 
   /* belum gabung acara -> kembali ke beranda dan tampilkan pop-up */
   useEffect(() => {
     if (!sudahGabung) { router.replace("/dashboard"); bukaPopup(); }
   }, [sudahGabung, router, bukaPopup]);
+
+  /* Periksa status klaim untuk misi yang sudah selesai */
+  const cekStatusKlaim = useCallback(async () => {
+    if (!sudahGabung || !kodeAcara || !nama) return;
+    const selesaiList = misi.filter((m) => m.capai >= m.target);
+    for (const m of selesaiList) {
+      const url = `/api/event/klaim?kode=${encodeURIComponent(kodeAcara)}&nama=${encodeURIComponent(nama)}&misiId=${m.id}`;
+      const r = await panggilApi(url);
+      if (r.ok && r.data?.klaim) {
+        setStatusKlaimMap((prev) => ({
+          ...prev,
+          [m.id]: Boolean(r.data.klaim.diklaim),
+        }));
+      }
+    }
+  }, [sudahGabung, kodeAcara, nama, misi]);
+
+  useEffect(() => {
+    cekStatusKlaim();
+  }, [cekStatusKlaim]);
 
   if (!sudahGabung) return null;
 
@@ -34,8 +58,10 @@ export default function MisiPage() {
         {misi.map((m, i) => {
           const pct = Math.min(100, (m.capai / m.target) * 100);
           const selesai = pct >= 100;
+          const sudahKlaim = Boolean(statusKlaimMap[m.id]);
+
           return (
-            <div className="misi" key={i}>
+            <div className={`misi ${selesai ? "misi-selesai" : ""}`} key={i}>
               <div className="misi-atas">
                 <p>{m.teks}</p>
                 <span className="co2">{m.target.toLocaleString("id-ID")} gCO₂e</span>
@@ -45,19 +71,39 @@ export default function MisiPage() {
               </div>
               <div className="misi-bawah">
                 <small>{Math.round(pct)}% selesai</small>
-                <button
-                  className="btn kecil"
-                  disabled={selesai}
-                  style={selesai ? { opacity: 0.5, cursor: "default" } : undefined}
-                  onClick={() => router.push(`/dashboard/kamera?misi=${i}`)}
-                >
-                  {selesai ? "Selesai" : "Kerjakan Misi"}
-                </button>
+                {selesai ? (
+                  <button
+                    className={`btn kecil ${sudahKlaim ? "btn-klaim-sudah" : "btn-klaim-aktif"}`}
+                    onClick={() => setMisiKlaim(m)}
+                    title={sudahKlaim ? "Lihat bukti klaim reward" : "Tampilkan QR untuk klaim reward"}
+                  >
+                    {sudahKlaim ? "✓ Hadiah Diklaim" : "🎁 Klaim Hadiah (QR)"}
+                  </button>
+                ) : (
+                  <button
+                    className="btn kecil"
+                    onClick={() => router.push(`/dashboard/kamera?misi=${i}`)}
+                  >
+                    Kerjakan Misi
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {misiKlaim && (
+        <ModalKlaimMisi
+          misi={misiKlaim}
+          kodeAcara={kodeAcara}
+          namaPeserta={nama}
+          onClose={() => setMisiKlaim(null)}
+          onKlaimBerhasil={(misiId) => {
+            setStatusKlaimMap((prev) => ({ ...prev, [misiId]: true }));
+          }}
+        />
+      )}
     </section>
   );
 }
