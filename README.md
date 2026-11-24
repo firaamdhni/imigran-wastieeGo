@@ -2,8 +2,8 @@
 
 [![Next.js](https://img.shields.io/badge/Framework-Next.js%2015-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/Library-React%2019-blue?logo=react)](https://react.js.org/)
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Public%20Image-2496ED?logo=docker)](https://hub.docker.com/r/hwracil/imigran-wastieego)
-[![Docker Tag](https://img.shields.io/badge/Tag-v1--UTS-success)](https://hub.docker.com/r/hwracil/imigran-wastieego/tags)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-Public%20Image-2496ED?logo=docker)](https://hub.docker.com/r/firaamdhni/imigran-wastieego)
+[![Docker Tag](https://img.shields.io/badge/Tag-v1--UTS-success)](https://hub.docker.com/r/firaamdhni/imigran-wastieego/tags)
 
 > **UTS PRAKTIKUM PEMROGRAMAN BERORIENTASI OBJEK LANJUT (POPL) KELAS A**  
 > Proyek Pengembangan Aplikasi Web Front-End Berbasis OOP & Kontainerisasi Docker
@@ -12,11 +12,11 @@
 
 ## 👥 Informasi Tim & Kontribusi
 
-| No | Nama Anggota | NPM | Peran Utama | Contoh Commit Kontribusi |
+| No | Nama Anggota | NIM | Peran Utama | Contoh Commit Kontribusi |
 |:---:|:---|:---:|:---|:---|
-| 1 | **Annisa Haura Dhiya** | 2408107010030 | Project Lead, Docker DevOps & State Management | `chore: konfigurasi Dockerfile multi-stage, docker-compose v1-UTS dan push Docker Hub` |
-| 2 | **Naila Hafizha** | 2408107010026 | Front-End UI/UX & Container-Presenter Pattern | `feat: integrasi halaman riwayat setoran dengan container-presenter pattern` |
-| 3 | **Fira Ramadhani** | 2408107010019 | OOP Domain Architecture & Git Workflow Lead | `feat: implementasi model OOP WasteItem, Mission, dan service klasifikasi` |
+| 1 | [Nama Anggota 1] | [NIM 1] | Project Lead & OOP Domain Architecture | `feat: implementasi model OOP WasteItem, Mission, dan service klasifikasi` |
+| 2 | [Nama Anggota 2] | [NIM 2] | UI/UX & Container-Presenter Implementation | `feat: integrasi halaman riwayat setoran dengan container-presenter pattern` |
+| 3 | [Nama Anggota 3] | [NIM 3] | Docker Containerization & State Management | `chore: konfigurasi Dockerfile multi-stage dan docker-compose v1-UTS` |
 
 ---
 
@@ -132,6 +132,59 @@ Pemisahan tegas antara logika penanganan data dengan rendering antarmuka:
 
 ---
 
+## 🛡️ Fitur Penyelenggara: Peserta, Evaluasi & Pemenang
+
+### Alur
+1. **Daftar sebagai penyelenggara**: masuk sebagai peserta → **Profil → Jadi Penyelenggara**. Isi data acara plus **e-mail dan kata sandi** (minimal 8 karakter). Akun penyelenggara dan acaranya langsung dibuat, lengkap dengan **kode acara** 6 karakter.
+2. **Masuk sebagai penyelenggara**: buka **`/penyelenggara/login`** (juga ada di halaman login dan menu Profil) memakai e-mail dan kata sandi tadi.
+3. **Peserta bergabung** lewat menu **Scan**: kamera memindai **QR acara** otomatis (atau ketik kode acara). QR juga bisa dipindai kamera bawaan ponsel, yang akan membuka halaman Scan dengan kode terisi.
+4. Di **panel penyelenggara** (`/penyelenggara`):
+   - **QR & kode acara** di bagian atas, QR bisa diunduh sebagai PNG untuk dicetak di poster.
+   - **Detail event** (tombol di samping *Unduh QR*): halaman *Edit Event* untuk mengubah foto sampul, nama, deskripsi singkat, kategori, tanggal, waktu mulai/selesai, lokasi, detail acara, dan **reward peserta**. Misi ditampilkan sesuai pengaturan sistem (belum bisa ditambah).
+   - **Peserta contoh**: tombol di tab Peserta menambahkan 26 peserta uji coba (lengkap dengan aktivitas dan fotonya) supaya verifikasi, penilaian, dan pembagian reward bisa dicoba tanpa peserta sungguhan. Bisa dihapus kapan saja dan tidak menyentuh peserta sungguhan.
+   - **Peserta**: nama, waktu bergabung, progres misi, jumlah aktivitas, skor (gCO₂e), dan status penilaian. Disegarkan otomatis tiap 15 detik, bisa dicari.
+   - **Evaluasi & Pemenang**:
+     1. **Periksa aktivitas**: buka tiap peserta untuk melihat riwayat aktivitas (setoran sampah) beserta foto yang diunggah.
+     2. **Verifikasi dua tahap**: tiap aktivitas dicek dua kali (Verifikasi 1 lalu Verifikasi 2), masing-masing *asli* atau *tidak asli*. Aktivitas yang dinyatakan tidak asli tidak dihitung ke skor.
+     3. **Penilaian akhir** per peserta: beri **nilai manual**, atau pilih **"hasil sudah benar, lewati penilaian manual"** agar skor otomatis (total emisi aktivitas yang tidak ditolak) dipakai.
+        Setelah peserta dinilai, aktivitasnya yang tidak ditolak berstatus *diterima* (tidak ada lagi yang "menunggu"). Menghapus penilaian mengembalikan status menunggu.
+     4. **Pemenang otomatis** mengikuti peringkat teratas (tanpa pilihan manual). Reward bertingkat; bawaannya **peringkat 1–3: goodie bag + merch event** dan **peringkat 4–23 (20 peserta): voucher expo event Rp10.000–Rp15.000**. Jumlah tingkat, nama, dan jumlah penerima diubah di Detail event. Seri skor: misi selesai terbanyak → aktivitas terbanyak → bergabung lebih dulu.
+   - Saat pemenang ditetapkan, acara ditandai selesai: peserta tidak bisa lagi bergabung/menyetor dan verifikasi/penilaian dikunci. Penyerahan reward dicentang per penerima atau per tingkat sekaligus, dan evaluasi bisa **dibuka kembali**.
+5. Di beranda peserta muncul banner: pemenang melihat juara dan rewardnya, peserta lain melihat ucapan terima kasih.
+
+Tiap penyelenggara hanya dapat melihat dan mengelola **acaranya sendiri**.
+
+### Konfigurasi
+Salin `.env.example` menjadi `.env`, lalu isi `SESSION_SECRET` (string acak panjang). Saat `npm run dev` tanpa `.env`, kunci bawaan khusus pengembangan dipakai; pada mode production variabel ini **wajib** diisi.
+Kata sandi penyelenggara disimpan sebagai hash scrypt di `DATA_DIR` (default `./data/db.json`), tidak pernah disimpan polos.
+
+### Arsitektur singkat
+| Bagian | Lokasi | Peran |
+|:---|:---|:---|
+| Konfigurasi bersama | `lib/eventConfig.js` | Target misi & batas pemenang, dipakai client dan server |
+| QR & kode acara | `lib/qr.js`, `lib/kodeAcara.js` | Pembuat QR (tanpa dependensi, diverifikasi dengan decoder OpenCV), tautan bergabung, pembaca kode |
+| Model `Peserta` | `lib/models/Peserta.js` | Enkapsulasi capaian & skor peserta (OOP) |
+| `EvaluasiService` | `lib/services/EvaluasiService.js` | Leaderboard, ringkasan, verifikasi, penilaian, penentuan pemenang per tingkat reward (fungsi murni) |
+| `DetailAcaraService` | `lib/services/DetailAcaraService.js` | Validasi Detail Event & reward, format tanggal/jam Indonesia (fungsi murni) |
+| Penyimpanan | `lib/server/db.js` | File JSON di `DATA_DIR`, tulis atomik dan diantre |
+| Akun & sesi | `lib/server/sesi.js` | Hash kata sandi (scrypt), cookie httpOnly bertanda tangan HMAC, pembatas percobaan |
+| Aturan acara | `lib/server/acara.js` | Kode acara, kepemilikan acara, pencatatan peserta |
+| Peserta contoh | `lib/server/contoh.js`, `app/api/penyelenggara/contoh` | 26 peserta uji coba (3 hadiah utama, 20 voucher, 3 di bawah batas, seri di peringkat 3–4) |
+| Detail Event | `app/api/penyelenggara/acara`, `components/penyelenggara/DetailEvent.js` | Simpan informasi acara, foto sampul, dan reward |
+| API peserta | `app/api/event/gabung`, `sinkron`, `aktivitas`, `status` | Bergabung dengan kode, kirim capaian misi, unggah aktivitas + foto, baca hasil milik sendiri |
+| API penyelenggara | `app/api/penyelenggara/daftar`, `session`, `peserta`, `aktivitas`, `penilaian`, `foto`, `pemenang` | Daftar, login, daftar peserta, riwayat aktivitas & verifikasi, penilaian, foto bukti, penetapan pemenang |
+| Foto bukti | `lib/server/foto.js`, `lib/foto.js` | Foto dikecilkan di browser (640px), divalidasi JPEG & ukuran di server, disimpan sebagai berkas di `DATA_DIR/foto/` |
+| UI penyelenggara | `app/penyelenggara/`, `components/penyelenggara/` | Container-Presenter, sama seperti halaman Riwayat |
+
+### Batasan prototipe yang perlu diketahui
+- **Login peserta belum diverifikasi backend** (lihat `TODO` di `app/login/page.js`): identitas peserta = nama pengguna, jadi dua orang dengan nama sama dianggap satu peserta, dan tombol "Lanjutkan dengan Google" selalu masuk sebagai `Inipira`. Untuk uji coba banyak peserta, masuk dengan nama pengguna berbeda.
+- **Pemindai kamera** butuh `https` atau `localhost`, dan memakai `BarcodeDetector` bila tersedia, `jsqr` sebagai cadangan (jalankan `npm install` setelah memperbarui proyek). QR berisi alamat situs yang dipakai penyelenggara saat membuka panel, jadi buka panel lewat alamat yang bisa dijangkau ponsel peserta (bukan `localhost`). Kode acara yang diketik selalu bisa jadi cadangan.
+- **Klasifikasi sampah masih simulasi di browser** (`WasteClassifierService`), jadi jenis dan emisi aktivitas dikirim oleh peserta. Itulah alasan penyelenggara memeriksa fotonya (verifikasi dua tahap). Server memvalidasi batas wajar, dan skor dihitung dari aktivitas yang diunggah, bukan dari angka kiriman peserta. Untuk acara sungguhan, klasifikasi sebaiknya dipindah ke server.
+- Satu akun penyelenggara = satu acara. Target misi sama untuk semua acara (`lib/eventConfig.js`).
+- Reset kata sandi belum ada. Penyimpanan JSON file cocok untuk **satu server/kontainer** (di Docker dipasang sebagai volume `wastieego-data`); hosting serverless memerlukan database eksternal: ganti isi `lib/server/db.js`, API route tidak perlu diubah.
+
+---
+
 ## 🔀 Standar Manajemen Versi (Git & GitHub)
 
 Tim mematuhi aturan baku version control sebagai berikut:
@@ -163,8 +216,8 @@ Format: `feat_{nama_fitur}/{tanggal}` dan `fix_{nama_fitur}/{tanggal}`. Setiap f
 Aplikasi telah dikontainerisasi menggunakan **Multi-Stage Build Dockerfile** untuk memastikan image berukuran kecil, efisien, dan aman.
 
 ### 1. Tautan Publik Docker Hub
-🔗 **Docker Hub Repository**: [https://hub.docker.com/r/hwracil/imigran-wastieego](https://hub.docker.com/r/hwracil/imigran-wastieego)  
-🏷️ **Image Tag Pengumpulan**: `hwracil/imigran-wastieego:v1-UTS` (Wajib berakhiran `-UTS`)
+🔗 **Docker Hub Repository**: [https://hub.docker.com/r/firaamdhni/imigran-wastieego](https://hub.docker.com/r/firaamdhni/imigran-wastieego)  
+🏷️ **Image Tag Pengumpulan**: `firaamdhni/imigran-wastieego:v1-UTS` (Wajib berakhiran `-UTS`)
 
 ### 2. Poin-Poin Penting Dockerfile
 - **Multi-Stage Build (4 Tahap)**:
@@ -177,29 +230,26 @@ Aplikasi telah dikontainerisasi menggunakan **Multi-Stage Build Dockerfile** unt
 
 ### 3. Panduan Menjalankan Docker Secara Lokal
 
-#### A. Menggunakan Docker CLI (Unduh & Jalankan Image Publik)
+#### A. Menggunakan Docker CLI
 ```bash
-# 1. Unduh image dari Docker Hub publik
-docker pull hwracil/imigran-wastieego:v1-UTS
+# 1. Build Docker image dengan tag berakhiran -UTS
+docker build -t mahasiswa/wastieego-app:v1-UTS .
 
-# 2. Jalankan kontainer
-docker run -d -p 3000:3000 --name wastieego-app hwracil/imigran-wastieego:v1-UTS
+# 2. Jalankan kontainer (SESSION_SECRET wajib diisi; volume menyimpan akun penyelenggara, peserta & pemenang)
+docker run -d -p 3000:3000 --name wastieego-web \
+  -e SESSION_SECRET=<string-acak> \
+  -v wastieego-data:/app/data \
+  mahasiswa/wastieego-app:v1-UTS
 
 # 3. Buka browser pada alamat:
 # http://localhost:3000
 ```
 
-#### B. Build & Run Secara Lokal dari Source Code
+#### B. Menggunakan Docker Compose
 ```bash
-# 1. Build Docker image lokal dengan tag berakhiran -UTS
-docker build -t hwracil/imigran-wastieego:v1-UTS .
+# Salin .env.example menjadi .env dan isi SESSION_SECRET terlebih dahulu
+cp .env.example .env
 
-# 2. Jalankan kontainer lokal
-docker run -d -p 3000:3000 --name wastieego-app hwracil/imigran-wastieego:v1-UTS
-```
-
-#### C. Menggunakan Docker Compose
-```bash
 # Jalankan service secara otomatis
 docker-compose up -d
 
@@ -207,16 +257,16 @@ docker-compose up -d
 docker-compose down
 ```
 
-### 4. Langkah Push ke Docker Hub (Telah Terpenuhi)
+### 4. Langkah Push ke Docker Hub
 ```bash
-# Login ke akun Docker Hub
+# Login ke Docker Hub
 docker login
 
-# Tag image sesuai nama repository publik
-docker tag wastieego-app:v1-UTS hwracil/imigran-wastieego:v1-UTS
+# Tag image sesuai nama repository publik Docker Hub Anda
+docker tag mahasiswa/wastieego-app:v1-UTS <username_dockerhub>/wastieego-app:v1-UTS
 
 # Push image ke Docker Hub publik
-docker push hwracil/imigran-wastieego:v1-UTS
+docker push <username_dockerhub>/wastieego-app:v1-UTS
 ```
 
 ---

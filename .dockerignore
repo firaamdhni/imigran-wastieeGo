@@ -8,5 +8,7 @@ yarn-error.log*
 .git
 .gitignore
 README.md
+data
+.env
 PRESENTASI_UTS.md
 .env*.local

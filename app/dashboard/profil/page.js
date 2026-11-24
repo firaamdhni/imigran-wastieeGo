@@ -91,6 +91,9 @@ export default function ProfilPage() {
               <button className="pen-btn" onClick={() => router.push("/dashboard/penyelenggara")}>
                 JADI PENYELENGGARA <span aria-hidden="true">→</span>
               </button>
+              <button className="pen-btn pen-btn-alt" onClick={() => router.push("/penyelenggara/login")}>
+                MASUK PANEL PENYELENGGARA
+              </button>
             </div>
           </aside>
         </div>

@@ -1,51 +1,127 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { panggilApi } from "@/lib/api";
+import { ambilKodeDariTeks } from "@/lib/kodeAcara";
 
-/* menggambar QR contoh (simulasi) */
-function gambarQR(c) {
-  const g = c.getContext("2d"), n = 25, sel = c.width / n;
-  g.fillStyle = "#f4f7ef"; g.fillRect(0, 0, c.width, c.height); g.fillStyle = "#111";
-  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const finder = (x, y) => {
-    g.fillStyle = "#111"; g.fillRect(x * sel, y * sel, 7 * sel, 7 * sel);
-    g.fillStyle = "#f4f7ef"; g.fillRect((x + 1) * sel, (y + 1) * sel, 5 * sel, 5 * sel);
-    g.fillStyle = "#111"; g.fillRect((x + 2) * sel, (y + 2) * sel, 3 * sel, 3 * sel);
-  };
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const f = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
-    const tengah = x > 8 && x < n - 9 && y > 8 && y < n - 9;
-    if (!f && !tengah && rnd() > 0.5) g.fillRect(x * sel, y * sel, sel, sel);
-  }
-  finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
-  const t = c.width / 2, r = 46;
-  g.fillStyle = "#fff"; g.beginPath(); g.roundRect(t - r, t - r, r * 2, r * 2, 18); g.fill();
-  g.fillStyle = "#1f5a2f"; g.beginPath(); g.ellipse(t - 8, t + 4, 12, 26, -0.5, 0, Math.PI * 2); g.fill();
-  g.fillStyle = "#4c8f4a"; g.beginPath(); g.ellipse(t + 10, t - 2, 12, 24, 0.5, 0, Math.PI * 2); g.fill();
-}
+/* kode yang dititipkan saat peserta membuka tautan QR sebelum login */
+const KUNCI_TERTUNDA = "wastieego_kode_tertunda";
 
-/* halaman scan QR untuk bergabung ke acara */
-export default function ScanPage() {
+function Scan() {
   const router = useRouter();
-  const { gabungAcara } = useStore();
-  const canvasRef = useRef(null);
+  const params = useSearchParams();
+  const { gabungAcara, nama } = useStore();
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const sibuk = useRef(false); // true selama menggabung / setelah berhasil, agar QR yang sama tidak diproses berulang
   const timers = useRef([]);
   const [status, setStatus] = useState("");
+  const [kode, setKode] = useState("");
+  const [pesanKamera, setPesanKamera] = useState("Membuka kamera...");
+  const [kameraAktif, setKameraAktif] = useState(false);
+  const [senter, setSenter] = useState(false);
 
+  /* kode dari tautan QR (?kode=...) atau yang dititipkan sebelum login */
   useEffect(() => {
-    if (canvasRef.current) gambarQR(canvasRef.current);
+    let k = ambilKodeDariTeks(params.get("kode") || "");
+    try {
+      const tertunda = sessionStorage.getItem(KUNCI_TERTUNDA);
+      if (tertunda) { sessionStorage.removeItem(KUNCI_TERTUNDA); k = k || ambilKodeDariTeks(tertunda); }
+    } catch (e) {}
+    if (k) { setKode(k); setStatus("Kode acara terisi dari QR. Tekan tombol bulat untuk bergabung."); }
+  }, [params]);
+
+  /* bergabung ke acara: dipakai oleh pemindai kamera maupun kode yang diketik */
+  const gabung = useCallback(async (masukan) => {
+    if (sibuk.current) return;
+    const k = ambilKodeDariTeks(masukan);
+    if (!k) return setStatus("Kode acara belum benar. Periksa lagi kode dari penyelenggara.");
+    sibuk.current = true;
+    setStatus("Memeriksa kode...");
+    const r = await panggilApi("/api/event/gabung", { method: "POST", body: { kode: k, nama } });
+    if (!r.ok) {
+      setStatus(r.data?.error || "Tidak dapat terhubung ke server.");
+      timers.current.push(setTimeout(() => { sibuk.current = false; }, 2500)); // jeda sebelum boleh mencoba lagi
+      return;
+    }
+    setKode(k);
+    setStatus("Berhasil bergabung di " + r.data.acara.nama + "!");
+    gabungAcara(r.data.acara);
+    timers.current.push(setTimeout(() => router.push("/dashboard"), 900));
+  }, [nama, gabungAcara, router]);
+
+  const gabungRef = useRef(gabung);
+  useEffect(() => { gabungRef.current = gabung; });
+
+  /* kamera + pemindaian QR: BarcodeDetector bila ada, jsQR sebagai cadangan (Chrome Windows, Firefox, Safari) */
+  useEffect(() => {
+    let batal = false;
+    let jeda;
+    (async () => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        return setPesanKamera("Kamera tidak didukung di browser ini. Ketik kode acara di bawah.");
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+        if (batal) return stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = stream;
+        const video = videoRef.current;
+        video.srcObject = stream;
+        await video.play();
+        setKameraAktif(true);
+
+        const detektor = typeof BarcodeDetector !== "undefined" ? new BarcodeDetector({ formats: ["qr_code"] }) : null;
+        const jsQR = detektor ? null : (await import("jsqr")).default;
+        const kanvas = document.createElement("canvas");
+        const ctx = kanvas.getContext("2d", { willReadFrequently: true });
+
+        const periksa = async () => {
+          if (batal) return;
+          if (video.readyState >= 2 && !sibuk.current) {
+            let teks = "";
+            try {
+              if (detektor) {
+                teks = (await detektor.detect(video))[0]?.rawValue || "";
+              } else {
+                kanvas.width = video.videoWidth;
+                kanvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+                const gambar = ctx.getImageData(0, 0, kanvas.width, kanvas.height);
+                teks = jsQR(gambar.data, gambar.width, gambar.height)?.data || "";
+              }
+            } catch (e) {}
+            if (teks) gabungRef.current(teks);
+          }
+          jeda = setTimeout(periksa, 250);
+        };
+        periksa();
+      } catch (e) {
+        setPesanKamera(
+          location.protocol === "http:" && location.hostname !== "localhost"
+            ? "Kamera hanya bisa dipakai lewat https atau localhost. Ketik kode acara di bawah."
+            : "Kamera tidak bisa dibuka. Izinkan akses kamera, atau ketik kode acara di bawah."
+        );
+      }
+    })();
     const t = timers.current;
-    return () => t.forEach(clearTimeout);
+    return () => {
+      batal = true;
+      clearTimeout(jeda);
+      t.forEach(clearTimeout);
+      streamRef.current?.getTracks().forEach((tr) => tr.stop());
+    };
   }, []);
 
-  const pindai = () => {
-    setStatus("Memindai...");
-    timers.current.push(setTimeout(() => {
-      setStatus("Berhasil bergabung!");
-      gabungAcara();
-      timers.current.push(setTimeout(() => router.push("/dashboard"), 900));
-    }, 900));
+  const nyalakanSenter = async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track?.getCapabilities?.().torch) return setStatus("Lampu tidak tersedia di perangkat ini.");
+    try {
+      await track.applyConstraints({ advanced: [{ torch: !senter }] });
+      setSenter(!senter);
+    } catch (e) {
+      setStatus("Lampu tidak bisa dinyalakan.");
+    }
   };
 
   return (
@@ -56,19 +132,39 @@ export default function ScanPage() {
           Kembali
         </button>
         <h1>Scan QR untuk bergabung!</h1>
-        <p>Scan sekarang dan jadilah bagian dari aksi kecil untuk bumi</p>
+        <p>Arahkan kamera ke QR dari penyelenggara. Tidak bisa memindai? Ketik kode acara di bawah, lalu tekan tombol bulat.</p>
         <div className="bingkai">
           <div className="pita">SCAN DI SINI</div>
-          <canvas id="qr" ref={canvasRef} width={400} height={400} />
+          <div className="pemindai">
+            <video ref={videoRef} muted playsInline hidden={!kameraAktif} aria-label="Pratinjau kamera untuk memindai QR" />
+            {kameraAktif ? <div className="pemindai-bidik" aria-hidden="true" /> : <p className="pemindai-pesan">{pesanKamera}</p>}
+          </div>
+        </div>
+        <div className="kode-acara">
+          <label htmlFor="kode-acara">Kode acara</label>
+          <input
+            id="kode-acara" value={kode} maxLength={10} autoComplete="off" placeholder="Contoh: K7M2QX"
+            onChange={(e) => setKode(e.target.value.toUpperCase())}
+            onKeyDown={(e) => { if (e.key === "Enter") gabung(kode); }}
+          />
         </div>
         <div className="kontrol">
-          <button className="rana" aria-label="Pindai QR" onClick={pindai} />
-          <button className="senter" aria-label="Nyalakan lampu">
+          <button className="rana" aria-label="Gabung dengan kode acara" onClick={() => gabung(kode)} />
+          <button className="senter" aria-label="Nyalakan lampu" aria-pressed={senter} onClick={nyalakanSenter}>
             <svg viewBox="0 0 24 24" fill="#fff"><path d="M13 2L4 14h6l-1 8 9-12h-6z" /></svg>
           </button>
         </div>
         <div className="pindai-status" role="status">{status}</div>
       </div>
     </section>
+  );
+}
+
+/* halaman scan QR untuk bergabung ke acara (useSearchParams butuh Suspense) */
+export default function ScanPage() {
+  return (
+    <Suspense fallback={null}>
+      <Scan />
+    </Suspense>
   );
 }

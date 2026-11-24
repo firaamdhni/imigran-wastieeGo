@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/Icons";
 import { NAMA_MISI_PENDEK, TOTAL_TARGET, persenTotal, useStore } from "@/lib/store";
+import BannerHasil from "@/components/BannerHasil";
 
 const KELILING = 263.9; // keliling cincin (2 * pi * 42)
 const WARNA = ["#3573c9", "#f47fbf", "#4a9a86"];
@@ -11,9 +12,10 @@ export default function BerandaPage() {
   const router = useRouter();
   const { nama, acara, sudahGabung: g, misi } = useStore();
 
+  const totalTarget = misi.reduce((a, m) => a + (m.target || 0), 0) || 1;
   let offset = 0;
   const segmen = misi.map((m) => {
-    const panjang = (m.capai / TOTAL_TARGET) * KELILING;
+    const panjang = (m.capai / totalTarget) * KELILING;
     const s = { panjang, offset };
     offset += panjang;
     return s;
@@ -35,6 +37,7 @@ export default function BerandaPage() {
 
       <div className="isi">
         <div>
+          <BannerHasil />
           <div className={"kartu" + (g ? " bersinar" : "")}>
             <div className="profil">
               <div className="avatar" aria-hidden="true"><Avatar /></div>
@@ -57,7 +60,7 @@ export default function BerandaPage() {
                     key={i}
                     className="seg"
                     cx="50" cy="50" r="42"
-                    stroke={WARNA[i]}
+                    stroke={WARNA[i % WARNA.length]}
                     strokeDasharray={`${s.panjang} ${KELILING - s.panjang}`}
                     strokeDashoffset={-s.offset}
                   />
@@ -69,7 +72,7 @@ export default function BerandaPage() {
               {misi.map((m, i) => (
                 <div className="baris" key={i}>
                   <div className="bar"><i style={{ width: `${(m.capai / m.target) * 100}%` }} /></div>
-                  {NAMA_MISI_PENDEK[i]}: {Math.round(m.capai).toLocaleString("id-ID")} gCO₂e tercapai
+                  {NAMA_MISI_PENDEK[i] || `Misi ${i + 1}`}: {Math.round(m.capai).toLocaleString("id-ID")} gCO₂e tercapai
                 </div>
               ))}
             </div>
